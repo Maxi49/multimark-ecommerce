@@ -10,7 +10,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo y descripción */}
           <div className="space-y-4">
-            <div className="relative h-16 w-48 bg-white p-2 rounded-lg">
+            <div className="relative h-16 w-48 bg-white/10 p-2 rounded-lg backdrop-blur-sm">
               <Image
                 src="/images/logo.png"
                 alt="Multimark Motos"

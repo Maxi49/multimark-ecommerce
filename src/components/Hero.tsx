@@ -11,101 +11,62 @@ export function Hero() {
   };
 
   return (
-    <section className="relative min-h-[80vh] flex items-center overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
-
-      {/* Red accent line */}
-      <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
+    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white">
+      {/* Abstract Background Element - Minimal Gray Shape */}
+      <div className="absolute right-0 top-0 h-full w-2/3 bg-gray-50/80 -skew-x-12 translate-x-1/4 z-0" />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Content */}
-          <div className="text-white space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 border border-primary/30 rounded-full">
-              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-primary">
-                100% Financiada
-              </span>
+        <div className="grid lg:grid-cols-5 gap-8 items-center">
+          {/* Content (2 cols) */}
+          <div className="lg:col-span-2 space-y-8">
+            <div>
+              <p className="text-primary font-bold tracking-widest uppercase text-sm mb-4">
+                La evolución del movimiento
+              </p>
+              <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-[0.9] text-black">
+                POTENCIA <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-700">
+                  SIN LÍMITES
+                </span>
+              </h1>
             </div>
 
-            <h1 className="font-bebas text-5xl md:text-7xl uppercase leading-tight">
-              Tu próxima moto
-              <br />
-              <span className="text-primary">está acá</span>
-            </h1>
-
-            <p className="text-gray-300 text-lg max-w-lg">
-              Encontrá la moto perfecta para vos. Las mejores marcas, los mejores
-              precios y la financiación que necesitás.
+            <p className="text-gray-600 text-lg leading-relaxed max-w-md">
+              Descubrí nuestra selección premium de motocicletas. 
+              Financiación exclusiva del 100% y entrega inmediata.
             </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Button
                 onClick={scrollToCatalogo}
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-white font-semibold uppercase tracking-wider"
+                className="h-14 px-8 bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-wider text-base rounded-full shadow-lg shadow-primary/20 transition-all hover:scale-105"
               >
                 Ver Catálogo
               </Button>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="lg"
-                className="border border-white text-white hover:bg-white hover:text-black uppercase tracking-wider"
+                className="h-14 px-8 border-2 border-gray-200 text-gray-900 hover:bg-gray-50 uppercase tracking-wider text-base rounded-full font-bold"
                 asChild
               >
                 <a href="/quienes-somos">Conocenos</a>
               </Button>
             </div>
-
-            {/* Stats */}
-            <div className="flex gap-8 pt-8 border-t border-white/10">
-              <div>
-                <p className="font-bebas text-4xl text-primary">6+</p>
-                <p className="text-sm text-gray-400">Marcas</p>
-              </div>
-              <div>
-                <p className="font-bebas text-4xl text-primary">50+</p>
-                <p className="text-sm text-gray-400">Modelos</p>
-              </div>
-              <div>
-                <p className="font-bebas text-4xl text-primary">100%</p>
-                <p className="text-sm text-gray-400">Financiación</p>
-              </div>
-            </div>
           </div>
 
-          {/* Image placeholder - se puede reemplazar con una imagen real */}
-          <div className="relative hidden lg:block">
-            <div className="relative h-[500px] w-full">
-              {/* Placeholder para imagen de moto destacada */}
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent z-10" />
+          {/* Image (3 cols) */}
+           <div className="lg:col-span-3 relative h-[500px] md:h-[600px] w-full">
               <Image
                 src="/images/hero-moto.png"
                 alt="Moto destacada"
                 fill
-                className="object-contain"
+                className="object-contain scale-110 drop-shadow-2xl mix-blend-multiply"
                 priority
               />
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <button
-        onClick={scrollToCatalogo}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 hover:text-white transition-colors animate-bounce"
-      >
-        <ChevronDown className="h-8 w-8" />
-      </button>
     </section>
   );
 }
