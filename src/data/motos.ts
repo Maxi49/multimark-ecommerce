@@ -4,7 +4,7 @@ import { Moto } from '@/types';
 // Para el cliente usamos el JSON importado estáticamente
 // Nota: En un entorno de producción ideal, el cliente debería hacer fetch a la API
 // para tener datos frescos, pero para el MVP esto asegura que compile y funcione rápido.
-const motos = motosData as Moto[];
+export const motos = motosData as Moto[];
 
 export const getMotosByMarca = (marca: string): Moto[] => {
   return motos.filter((moto) => moto.marca.toLowerCase() === marca.toLowerCase());
