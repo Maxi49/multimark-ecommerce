@@ -1,4 +1,4 @@
-import motosData from './motos.json';
+﻿import motosData from './motos.json';
 import { Moto } from '@/types';
 
 // Para el cliente usamos el JSON importado estáticamente
@@ -23,3 +23,4 @@ export const searchMotos = (query: string): Moto[] => {
       moto.tipo.toLowerCase().includes(lowerQuery)
   );
 };
+

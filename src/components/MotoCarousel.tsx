@@ -1,54 +1,65 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { MotoCard } from './MotoCard';
 import { MotoModal } from './MotoModal';
 import { Moto, MARCAS } from '@/types';
-import { motos, getMotosByMarca, searchMotos } from '@/data/motos';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { BrandCarousel } from './BrandCarousel';
 
 interface MotoCarouselProps {
   searchQuery?: string;
+  motos: Moto[];
+  whatsappNumber: string;
+  catalogImageHeight?: number;
 }
 
-export function MotoCarousel({ searchQuery }: MotoCarouselProps) {
+export function MotoCarousel({
+  searchQuery,
+  motos,
+  whatsappNumber,
+  catalogImageHeight,
+}: MotoCarouselProps) {
   const [selectedMoto, setSelectedMoto] = useState<Moto | null>(null);
-  const [scrollPositions, setScrollPositions] = useState<Record<string, number>>({});
+  const resolvedCatalogImageHeight =
+    typeof catalogImageHeight === 'number' && Number.isFinite(catalogImageHeight)
+      ? catalogImageHeight
+      : 192;
 
   // Si hay búsqueda, mostrar resultados filtrados
-  const filteredMotos = searchQuery ? searchMotos(searchQuery) : null;
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    const filteredMotos = motos.filter(
+      (moto) =>
+        moto.marca.toLowerCase().includes(query) ||
+        moto.nombre.toLowerCase().includes(query)
+    );
 
-  const scroll = (marcaId: string, direction: 'left' | 'right') => {
-    const container = document.getElementById(`carousel-${marcaId}`);
-    if (container) {
-      const scrollAmount = direction === 'left' ? -320 : 320;
-      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      setScrollPositions((prev) => ({
-        ...prev,
-        [marcaId]: container.scrollLeft + scrollAmount,
-      }));
-    }
-  };
-
-  // Mostrar resultados de búsqueda
-  if (filteredMotos) {
     return (
       <section className="py-12">
         <div className="container mx-auto px-4">
           <h2 className="font-bebas text-3xl uppercase mb-6">
-            Resultados para "{searchQuery}"
+            Resultados para &quot;{searchQuery}&quot;
           </h2>
           {filteredMotos.length === 0 ? (
             <p className="text-gray-500">No se encontraron motos.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredMotos.map((moto) => (
-                <MotoCard
+              {filteredMotos.map((moto, index) => (
+                <div
                   key={moto.id}
-                  moto={moto}
-                  onClick={setSelectedMoto}
-                />
+                  data-reveal
+                  className="reveal"
+                  style={{
+                    '--reveal-delay': `${(index % 4) * 90}ms`,
+                  } as CSSProperties}
+                >
+                  <MotoCard
+                    moto={moto}
+                    onClick={setSelectedMoto}
+                    imageHeight={resolvedCatalogImageHeight}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -57,6 +68,7 @@ export function MotoCarousel({ searchQuery }: MotoCarouselProps) {
           moto={selectedMoto}
           isOpen={!!selectedMoto}
           onClose={() => setSelectedMoto(null)}
+          whatsappNumber={whatsappNumber}
         />
       </section>
     );
@@ -73,50 +85,31 @@ export function MotoCarousel({ searchQuery }: MotoCarouselProps) {
           Explorá nuestra selección de motos por marca
         </p>
 
-        {MARCAS.map((marca) => {
-          const marcaMotos = getMotosByMarca(marca.nombre);
+        {MARCAS.map((marca, index) => {
+          const marcaMotos = motos.filter((m) => m.marca === marca.nombre);
           if (marcaMotos.length === 0) return null;
 
           return (
-            <div key={marca.id} id={marca.id} className="mb-12 scroll-mt-24">
+            <div
+              key={marca.id}
+              id={marca.id}
+              data-reveal
+              className="mb-12 scroll-mt-24 reveal"
+              style={{
+                '--reveal-delay': `${index * 120}ms`,
+              } as CSSProperties}
+            >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bebas text-2xl uppercase text-primary">
+                <h3 className="font-bebas text-2xl uppercase text-primary border-l-4 border-secondary pl-3">
                   {marca.nombre}
                 </h3>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => scroll(marca.id, 'left')}
-                    className="rounded-full"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => scroll(marca.id, 'right')}
-                    className="rounded-full"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
               </div>
 
-              <div
-                id={`carousel-${marca.id}`}
-                className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {marcaMotos.map((moto) => (
-                  <div
-                    key={moto.id}
-                    className="flex-shrink-0 w-72 snap-start"
-                  >
-                    <MotoCard moto={moto} onClick={setSelectedMoto} />
-                  </div>
-                ))}
-              </div>
+              <BrandCarousel
+                motos={marcaMotos}
+                onMotoClick={setSelectedMoto}
+                imageHeight={resolvedCatalogImageHeight}
+              />
             </div>
           );
         })}
@@ -126,6 +119,7 @@ export function MotoCarousel({ searchQuery }: MotoCarouselProps) {
         moto={selectedMoto}
         isOpen={!!selectedMoto}
         onClose={() => setSelectedMoto(null)}
+        whatsappNumber={whatsappNumber}
       />
     </section>
   );

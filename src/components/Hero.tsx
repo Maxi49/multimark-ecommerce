@@ -1,14 +1,41 @@
-'use client';
-
+﻿import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { getMotoImageUrl } from '@/lib/cloudinary-url';
+import { Moto } from '@/types';
 
-export function Hero() {
+interface HeroProps {
+  heroMotos?: Moto[];
+  imageScale?: number;
+}
+
+export function Hero({ heroMotos = [], imageScale }: HeroProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Auto-advance carousel if more than 1 moto
+  useEffect(() => {
+    if (heroMotos.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % heroMotos.length);
+    }, 5000); // 5 seconds per slide
+
+    return () => clearInterval(interval);
+  }, [heroMotos.length]);
+
   const scrollToCatalogo = () => {
     const catalogo = document.getElementById('catalogo');
     catalogo?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const hasHeroMotos = heroMotos.length > 0;
+  const currentMoto = hasHeroMotos ? heroMotos[currentIndex] : null;
+  const heroImageScale =
+    typeof imageScale === 'number' && Number.isFinite(imageScale) ? imageScale : 1.05;
+  const displayName = currentMoto
+    ? `${currentMoto.marca} ${currentMoto.nombre}`
+    : 'MODELOS EXCLUSIVOS';
 
   return (
     <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white">
@@ -20,8 +47,9 @@ export function Hero() {
           {/* Content (2 cols) */}
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <p className="text-primary font-bold tracking-widest uppercase text-sm mb-4">
+              <p className="font-script text-lg text-gray-700">
                 La evolución del movimiento
+                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-secondary align-middle" />
               </p>
               <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-[0.9] text-black">
                 POTENCIA <br />
@@ -32,7 +60,7 @@ export function Hero() {
             </div>
 
             <p className="text-gray-600 text-lg leading-relaxed max-w-md">
-              Descubrí nuestra selección premium de motocicletas. 
+              Descubrí nuestra selección premium de motocicletas.
               Financiación exclusiva del 100% y entrega inmediata.
             </p>
 
@@ -40,7 +68,7 @@ export function Hero() {
               <Button
                 onClick={scrollToCatalogo}
                 size="lg"
-                className="h-14 px-8 bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-wider text-base rounded-full shadow-lg shadow-primary/20 transition-all hover:scale-105"
+                className="h-14 px-8 bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-wider text-base rounded-full shadow-lg shadow-primary/20"
               >
                 Ver Catálogo
               </Button>
@@ -50,20 +78,81 @@ export function Hero() {
                 className="h-14 px-8 border-2 border-gray-200 text-gray-900 hover:bg-gray-50 uppercase tracking-wider text-base rounded-full font-bold"
                 asChild
               >
-                <a href="/quienes-somos">Conocenos</a>
+                <a href="/quienes-somos">Conócenos</a>
               </Button>
             </div>
           </div>
 
           {/* Image (3 cols) */}
-           <div className="lg:col-span-3 relative h-[500px] md:h-[600px] w-full">
-              <Image
-                src="/images/hero-moto.png"
-                alt="Moto destacada"
-                fill
-                className="object-contain scale-110 drop-shadow-2xl mix-blend-multiply"
-                priority
-              />
+          <div className="lg:col-span-3 relative h-[500px] md:h-[600px] w-full flex items-center justify-center overflow-hidden">
+            {/* Moto Name Label (Dynamic) */}
+            {currentMoto && (
+              <div
+                key={currentMoto.id}
+                className="absolute top-10 right-10 z-20 bg-white/80 backdrop-blur-sm border border-gray-200 px-6 py-3 rounded-2xl shadow-sm animate-in fade-in-0 slide-in-from-bottom-2 duration-500"
+              >
+                <p className="font-bebas text-xl text-gray-800 uppercase tracking-wider">
+                  {displayName}
+                </p>
+              </div>
+            )}
+
+            {hasHeroMotos ? (
+              heroMotos.map((moto, idx) => (
+                <div
+                  key={moto.id}
+                  className={cn(
+                    "absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out will-change-transform will-change-opacity motion-reduce:transition-none",
+                    idx === currentIndex
+                      ? "opacity-100 translate-y-0 scale-100"
+                      : "opacity-0 translate-y-3 scale-[0.98] pointer-events-none"
+                  )}
+                >
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={getMotoImageUrl(moto.imagen)}
+                      alt="Moto destacada"
+                      fill
+                      className="object-contain mix-blend-multiply transition-transform duration-700"
+                      style={{ transform: `scale(${heroImageScale})` }}
+                      priority={idx === currentIndex}
+                      sizes="(max-width: 768px) 100vw, 60vw"
+                      quality={95}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative h-full w-full">
+                  <Image
+                    src={getMotoImageUrl('/images/hero-moto.png')}
+                    alt="Moto destacada"
+                    fill
+                    className="object-contain mix-blend-multiply transition-transform duration-700"
+                    style={{ transform: `scale(${heroImageScale})` }}
+                    priority
+                    sizes="(max-width: 768px) 100vw, 60vw"
+                    quality={95}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Carousel Indicators */}
+            {heroMotos.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {heroMotos.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`h-2 rounded-full transition-all ${
+                      idx === currentIndex ? 'w-8 bg-primary' : 'w-2 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

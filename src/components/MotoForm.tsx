@@ -1,19 +1,26 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Moto, MARCAS } from '@/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
+import { ChevronDown } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface MotoFormProps {
   moto?: Moto;
@@ -22,13 +29,62 @@ interface MotoFormProps {
   onClose: () => void;
 }
 
+// Opciones predefinidas para facilitar la carga
+const SPEC_OPTIONS = {
+  cilindrada: ['110cc', '125cc', '150cc', '200cc', '250cc', '300cc', '400cc', '650cc'],
+  motor: ['4 Tiempos', 'Monocilíndrico', 'Bicilíndrico', '4 Tiempos, Monocilíndrico OHC'],
+  frenos: ['Tambor', 'Disco', 'Disco/Tambor', 'Disco/Disco', 'ABS'],
+  arranque: ['Eléctrico', 'Patada', 'Eléctrico/Patada'],
+  capacidadTanque: ['3.5L', '4L', '5L', '6L', '9L', '12L', '15L'],
+};
+
+interface SpecInputProps {
+  label: string;
+  value?: string;
+  onChange: (value: string) => void;
+  options: string[];
+}
+
+function SpecInput({ label, value, onChange, options }: SpecInputProps) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex gap-2">
+        <Input
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={`Escribir ${label.toLowerCase()}...`}
+          className="flex-1"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="shrink-0">
+              <ChevronDown className="h-4 w-4 opacity-50" />
+              <span className="sr-only">Opciones</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {options.map((opt) => (
+              <DropdownMenuItem key={opt} onClick={() => onChange(opt)}>
+                {opt}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+}
+
 export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
   const [formData, setFormData] = useState<Partial<Moto>>({
     nombre: '',
     marca: 'Honda',
     tipo: 'urbana',
-    imagen: '/images/logo.png', // Default
+    imagen: '',
+    cloudinary_public_id: '',
     destacada: false,
+    show_in_hero: false,
     specs: {
       cilindrada: '',
       motor: '',
@@ -37,6 +93,8 @@ export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
       capacidadTanque: '',
     },
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     if (moto) {
@@ -46,8 +104,10 @@ export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
         nombre: '',
         marca: 'Honda',
         tipo: 'urbana',
-        imagen: '/images/logo.png',
+        imagen: '',
+        cloudinary_public_id: '',
         destacada: false,
+        show_in_hero: false,
         specs: {
           cilindrada: '',
           motor: '',
@@ -57,10 +117,18 @@ export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
         },
       });
     }
+    setFormError('');
   }, [moto, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+
+    if (!formData.imagen) {
+      setFormError('Subí una imagen para continuar.');
+      return;
+    }
+
     onSave(formData as Moto);
   };
 
@@ -109,7 +177,7 @@ export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
               <Label>Tipo</Label>
               <Select
                 value={formData.tipo}
-                onValueChange={(value: any) => setFormData({ ...formData, tipo: value })}
+                onValueChange={(value: Moto['tipo']) => setFormData({ ...formData, tipo: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -123,11 +191,50 @@ export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>URL Imagen</Label>
-              <Input
-                value={formData.imagen}
-                onChange={(e) => setFormData({ ...formData, imagen: e.target.value })}
-              />
+              <Label>Imagen</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    setIsUploading(true);
+                    try {
+                      const uploadData = new FormData();
+                      uploadData.append('file', file);
+                      uploadData.append('kind', 'moto');
+
+                      const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: uploadData,
+                      });
+
+                      const data = await res.json();
+                      if (data.url) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          imagen: data.url,
+                          cloudinary_public_id: data.publicId || '',
+                        }));
+                        setFormError('');
+                      }
+                    } catch (error) {
+                      console.error('Upload failed:', error);
+                    } finally {
+                      setIsUploading(false);
+                    }
+                  }}
+                  disabled={isUploading}
+                />
+                {isUploading && (
+                  <span className="text-sm text-blue-600 animate-pulse">Subiendo...</span>
+                )}
+              </div>
+              {formData.imagen && (
+                <p className="text-xs text-gray-500">Imagen cargada correctamente.</p>
+              )}
             </div>
           </div>
 
@@ -135,60 +242,70 @@ export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
             <h4 className="mb-4 text-sm font-semibold uppercase text-gray-500">
               Especificaciones
             </h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Cilindrada</Label>
-                <Input
-                  value={formData.specs?.cilindrada}
-                  onChange={(e) => handleSpecChange('cilindrada', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Motor</Label>
-                <Input
-                  value={formData.specs?.motor}
-                  onChange={(e) => handleSpecChange('motor', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Frenos</Label>
-                <Input
-                  value={formData.specs?.frenos}
-                  onChange={(e) => handleSpecChange('frenos', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Arranque</Label>
-                <Input
-                  value={formData.specs?.arranque}
-                  onChange={(e) => handleSpecChange('arranque', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Capacidad Tanque</Label>
-                <Input
-                  value={formData.specs?.capacidadTanque}
-                  onChange={(e) =>
-                    handleSpecChange('capacidadTanque', e.target.value)
-                  }
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <SpecInput
+                label="Cilindrada"
+                value={formData.specs?.cilindrada}
+                onChange={(val) => handleSpecChange('cilindrada', val)}
+                options={SPEC_OPTIONS.cilindrada}
+              />
+              <SpecInput
+                label="Motor"
+                value={formData.specs?.motor}
+                onChange={(val) => handleSpecChange('motor', val)}
+                options={SPEC_OPTIONS.motor}
+              />
+              <SpecInput
+                label="Frenos"
+                value={formData.specs?.frenos}
+                onChange={(val) => handleSpecChange('frenos', val)}
+                options={SPEC_OPTIONS.frenos}
+              />
+              <SpecInput
+                label="Arranque"
+                value={formData.specs?.arranque}
+                onChange={(val) => handleSpecChange('arranque', val)}
+                options={SPEC_OPTIONS.arranque}
+              />
+              <SpecInput
+                label="Capacidad Tanque"
+                value={formData.specs?.capacidadTanque}
+                onChange={(val) => handleSpecChange('capacidadTanque', val)}
+                options={SPEC_OPTIONS.capacidadTanque}
+              />
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="destacada"
-              checked={formData.destacada}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, destacada: checked as boolean })
-              }
-            />
-            <Label htmlFor="destacada">Destacada en inicio</Label>
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="destacada"
+                checked={formData.destacada}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, destacada: checked as boolean })
+                }
+              />
+              <Label htmlFor="destacada">Destacada en inicio (Carrusel)</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="show_in_hero"
+                checked={formData.show_in_hero}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, show_in_hero: checked as boolean })
+                }
+              />
+              <Label htmlFor="show_in_hero" className="font-bold text-blue-600">
+                Mostrar en Portada Principal (Hero)
+              </Label>
+            </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Guardar
+          {formError && <p className="text-sm text-red-600">{formError}</p>}
+
+          <Button type="submit" className="w-full" disabled={isUploading}>
+            {isUploading ? 'Procesando imagen...' : 'Guardar'}
           </Button>
         </form>
       </DialogContent>

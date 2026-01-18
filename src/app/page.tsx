@@ -1,26 +1,22 @@
-'use client';
+﻿import { supabase } from '@/lib/supabase';
+import { getPublicSettings } from '@/lib/settings';
+import { HomeClient } from '@/components/HomeClient';
+import { Moto } from '@/types';
 
-import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Hero } from '@/components/Hero';
-import { MotoCarousel } from '@/components/MotoCarousel';
-import { WhatsAppButton } from '@/components/WhatsAppButton';
+// Revalidate data every 0 seconds (always fresh)
+export const revalidate = 0;
 
-export default function Home() {
-  const [searchQuery, setSearchQuery] = useState('');
+export default async function Home() {
+  const [{ data: motos }, settings] = await Promise.all([
+    supabase
+      .from('motos')
+      .select('*')
+      .order('created_at', { ascending: false }),
+    getPublicSettings(),
+  ]);
 
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Header onSearch={setSearchQuery} />
-      
-      <main className="flex-1">
-        {!searchQuery && <Hero />}
-        <MotoCarousel searchQuery={searchQuery} />
-      </main>
+  const motosData = (motos || []) as Moto[];
 
-      <Footer />
-      <WhatsAppButton />
-    </div>
-  );
+  return <HomeClient motos={motosData} settings={settings} />;
 }
+

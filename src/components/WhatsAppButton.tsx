@@ -1,14 +1,20 @@
-'use client';
+﻿'use client';
 
 import { MessageCircle } from 'lucide-react';
-import { WHATSAPP_NUMBER } from '@/types';
+import { DEFAULT_WHATSAPP_NUMBER } from '@/types';
 
-export function WhatsAppButton() {
+interface WhatsAppButtonProps {
+  whatsappNumber?: string;
+  message?: string;
+}
+
+export function WhatsAppButton({ whatsappNumber, message }: WhatsAppButtonProps) {
   const handleClick = () => {
-    const message = encodeURIComponent(
-      'Hola! Me gustaría recibir información sobre las motos disponibles.'
+    const text = encodeURIComponent(
+      message || 'Hola! Me gustaría recibir información sobre las motos disponibles.'
     );
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+    const number = (whatsappNumber || DEFAULT_WHATSAPP_NUMBER).replace(/[^\d]/g, '');
+    window.open(`https://wa.me/${number}?text=${text}`, '_blank');
   };
 
   return (
@@ -18,7 +24,7 @@ export function WhatsAppButton() {
       aria-label="Contactar por WhatsApp"
     >
       <MessageCircle className="h-7 w-7" />
-      
+
       {/* Tooltip */}
       <span className="absolute right-16 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap">
         ¿Necesitás ayuda?
@@ -31,3 +37,4 @@ export function WhatsAppButton() {
     </button>
   );
 }
+

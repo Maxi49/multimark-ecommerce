@@ -1,4 +1,4 @@
-// Tipos para las motos
+﻿// Tipos para las motos
 export interface MotoSpec {
   cilindrada: string;
   motor: string;
@@ -13,14 +13,29 @@ export interface Moto {
   marca: string;
   tipo: 'urbana' | 'enduro' | 'street' | 'scooter';
   imagen: string;
+  cloudinary_public_id?: string;
   specs: MotoSpec;
   destacada?: boolean;
+  show_in_hero?: boolean;
 }
 
 export interface Marca {
   id: string;
   nombre: string;
   logo?: string;
+}
+
+export interface PublicSettings {
+  logoUrl: string;
+  mapUrl: string;
+  whatsappNumber: string;
+  phone: string;
+  address: string;
+  email: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  heroImageScale: number;
+  catalogImageHeight: number;
 }
 
 // Marcas disponibles
@@ -33,8 +48,8 @@ export const MARCAS: Marca[] = [
   { id: 'guerrero', nombre: 'Guerrero' },
 ];
 
-// Número de WhatsApp para consultas (cambiar por el real)
-export const WHATSAPP_NUMBER = '5491112345678';
+// Número de WhatsApp por defecto (fallback)
+export const DEFAULT_WHATSAPP_NUMBER = '5491112345678';
 
 // Mensaje predefinido para WhatsApp
 export const getWhatsAppMessage = (motoNombre: string, marca: string) => {
@@ -42,7 +57,12 @@ export const getWhatsAppMessage = (motoNombre: string, marca: string) => {
 };
 
 // Generar link de WhatsApp
-export const getWhatsAppLink = (motoNombre: string, marca: string) => {
+export const getWhatsAppLink = (
+  whatsappNumber: string,
+  motoNombre: string,
+  marca: string
+) => {
   const message = encodeURIComponent(getWhatsAppMessage(motoNombre, marca));
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+  const sanitizedNumber = whatsappNumber.replace(/[^\d]/g, '');
+  return `https://wa.me/${sanitizedNumber}?text=${message}`;
 };

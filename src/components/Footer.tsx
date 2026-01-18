@@ -1,9 +1,32 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import Image from 'next/image';
 import { Facebook, Instagram, Phone, MapPin, Mail } from 'lucide-react';
 import { MARCAS } from '@/types';
 
-export function Footer() {
+interface FooterProps {
+  logoUrl?: string;
+  phone?: string;
+  address?: string;
+  email?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+}
+
+export function Footer({
+  logoUrl,
+  phone,
+  address,
+  email,
+  instagramUrl,
+  facebookUrl,
+}: FooterProps) {
+  const logoSrc = logoUrl || '/images/logo.png';
+  const resolvedPhone = phone || '+54 9 11 1234-5678';
+  const resolvedAddress = address || 'Av. Ejemplo 1234, Buenos Aires, Argentina';
+  const resolvedEmail = email || 'info@multimarkmotos.com';
+  const resolvedInstagram = instagramUrl || 'https://instagram.com';
+  const resolvedFacebook = facebookUrl || 'https://facebook.com';
+
   return (
     <footer className="bg-black text-white">
       <div className="container mx-auto px-4 py-12">
@@ -12,7 +35,7 @@ export function Footer() {
           <div className="space-y-4">
             <div className="relative h-16 w-48 bg-white/10 p-2 rounded-lg backdrop-blur-sm">
               <Image
-                src="/images/logo.png"
+                src={logoSrc}
                 alt="Multimark Motos"
                 fill
                 className="object-contain object-left"
@@ -24,7 +47,7 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               <a
-                href="https://facebook.com"
+                href={resolvedFacebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -32,7 +55,7 @@ export function Footer() {
                 <Facebook className="h-5 w-5" />
               </a>
               <a
-                href="https://instagram.com"
+                href={resolvedInstagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -110,15 +133,15 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-gray-400 text-sm">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>+54 9 11 1234-5678</span>
+                <span>{resolvedPhone}</span>
               </li>
               <li className="flex items-center gap-3 text-gray-400 text-sm">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>info@multimarkmotos.com</span>
+                <span>{resolvedEmail}</span>
               </li>
               <li className="flex items-start gap-3 text-gray-400 text-sm">
                 <MapPin className="h-4 w-4 text-primary mt-0.5" />
-                <span>Av. Ejemplo 1234, Buenos Aires, Argentina</span>
+                <span>{resolvedAddress}</span>
               </li>
             </ul>
           </div>
@@ -132,3 +155,4 @@ export function Footer() {
     </footer>
   );
 }
+

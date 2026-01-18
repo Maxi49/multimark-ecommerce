@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "id": "honda-wave-110",
     "nombre": "Wave 110",
@@ -81,11 +81,11 @@
     "tipo": "enduro",
     "imagen": "/images/motos/zanella-zr-150.png",
     "specs": {
-      "cilindrada": "150cc",
-      "motor": "4 Tiempos",
+      "cilindrada": "150 cc",
+      "motor": "4 tiempos",
       "frenos": "Disco/Tambor",
       "arranque": "Eléctrico/Patada",
-      "capacidadTanque": "12L"
+      "capacidadTanque": "12 L"
     },
     "destacada": false
   },
@@ -96,11 +96,11 @@
     "tipo": "street",
     "imagen": "/images/motos/motomel-blitz-110.png",
     "specs": {
-      "cilindrada": "150cc",
-      "motor": "4 Tiempos",
+      "cilindrada": "150 cc",
+      "motor": "4 tiempos",
       "frenos": "Disco/Tambor",
       "arranque": "Eléctrico",
-      "capacidadTanque": "11L"
+      "capacidadTanque": "11 L"
     },
     "destacada": false
   },
@@ -111,11 +111,11 @@
     "tipo": "street",
     "imagen": "/images/motos/zanella-zr-150.png",
     "specs": {
-      "cilindrada": "150cc",
-      "motor": "4 Tiempos",
+      "cilindrada": "150 cc",
+      "motor": "4 tiempos",
       "frenos": "Disco/Tambor",
       "arranque": "Eléctrico",
-      "capacidadTanque": "14L"
+      "capacidadTanque": "14 L"
     },
     "destacada": false
   },
@@ -126,11 +126,11 @@
     "tipo": "urbana",
     "imagen": "/images/motos/corven-triax-150.png",
     "specs": {
-      "cilindrada": "110cc",
-      "motor": "4 Tiempos",
+      "cilindrada": "110 cc",
+      "motor": "4 tiempos",
       "frenos": "Tambor",
       "arranque": "Eléctrico/Patada",
-      "capacidadTanque": "4L"
+      "capacidadTanque": "4 L"
     },
     "destacada": false
   },
@@ -141,12 +141,13 @@
     "tipo": "street",
     "imagen": "/images/motos/keller-crono-110.png",
     "specs": {
-      "cilindrada": "150cc",
-      "motor": "4 Tiempos",
+      "cilindrada": "150 cc",
+      "motor": "4 tiempos",
       "frenos": "Disco",
       "arranque": "Eléctrico",
-      "capacidadTanque": "12L"
+      "capacidadTanque": "12 L"
     },
     "destacada": false
   }
 ]
+

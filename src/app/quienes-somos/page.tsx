@@ -1,9 +1,14 @@
+﻿import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { CheckCircle, Users, Award, Heart } from 'lucide-react';
+import { LocationMap } from '@/components/LocationMap';
+import { ScrollReveal } from '@/components/ScrollReveal';
+import { getPublicSettings } from '@/lib/settings';
 
-export default function QuienesSomos() {
+export default async function QuienesSomos() {
   const valores = [
     {
       icon: CheckCircle,
@@ -27,11 +32,14 @@ export default function QuienesSomos() {
     },
   ];
 
+  const settings = await getPublicSettings();
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header logoUrl={settings.logoUrl} />
 
       <main className="flex-1">
+        <ScrollReveal />
         {/* Hero */}
         <section className="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
           <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
@@ -81,7 +89,11 @@ export default function QuienesSomos() {
               {valores.map((valor, index) => (
                 <div
                   key={index}
-                  className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow text-center"
+                  data-reveal
+                  className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow text-center reveal"
+                  style={{
+                    '--reveal-delay': `${index * 90}ms`,
+                  } as CSSProperties}
                 >
                   <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 text-primary rounded-full mb-4">
                     <valor.icon className="h-7 w-7" />
@@ -101,21 +113,30 @@ export default function QuienesSomos() {
               ¿Listo para encontrar tu moto?
             </h2>
             <p className="text-white/80 mb-8 max-w-xl mx-auto">
-              Visitanos o contactanos por WhatsApp. Estamos para ayudarte a elegir
+              Visitá nuestro local o contactanos por WhatsApp. Estamos para ayudarte a elegir
               la moto perfecta para vos.
             </p>
-            <a
+            <Link
               href="/#catalogo"
               className="inline-flex items-center gap-2 px-8 py-3 bg-white text-primary font-semibold uppercase tracking-wider rounded-lg hover:bg-gray-100 transition-colors"
             >
               Ver Catálogo
-            </a>
+            </Link>
           </div>
         </section>
+
+        <LocationMap mapUrl={settings.mapUrl} />
       </main>
 
-      <Footer />
-      <WhatsAppButton />
+      <Footer
+        logoUrl={settings.logoUrl}
+        phone={settings.phone}
+        email={settings.email}
+        address={settings.address}
+        instagramUrl={settings.instagramUrl}
+        facebookUrl={settings.facebookUrl}
+      />
+      <WhatsAppButton whatsappNumber={settings.whatsappNumber} />
     </div>
   );
 }

@@ -1,21 +1,38 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { MARCAS } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
+  logoUrl?: string;
 }
 
-export function Header({ onSearch }: HeaderProps) {
+export function Header({ onSearch, logoUrl }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const logoSrc = logoUrl || '/images/logo.png';
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,13 +46,18 @@ export function Header({ onSearch }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-gray-100">
+    <header
+      className={cn(
+        'sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur supports-backdrop-filter:bg-white/80 transition-shadow duration-300',
+        isScrolled ? 'shadow-lg shadow-black/5' : 'shadow-none'
+      )}
+    >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="relative h-16 w-52">
             <Image
-              src="/images/logo.png"
+              src={logoSrc}
               alt="Multimark Motos"
               fill
               className="object-contain"
@@ -55,7 +77,7 @@ export function Header({ onSearch }: HeaderProps) {
               {link.label}
             </Link>
           ))}
-          
+
           {/* Dropdown de Marcas */}
           <div className="relative group">
             <button className="text-sm font-medium text-gray-700 hover:text-primary transition-colors uppercase tracking-wide">
@@ -104,39 +126,45 @@ export function Header({ onSearch }: HeaderProps) {
           </Button>
 
           {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px]">
-              <nav className="flex flex-col gap-4 mt-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-lg font-medium text-gray-700 hover:text-primary transition-colors uppercase"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="border-t pt-4 mt-4">
-                  <p className="text-sm font-semibold text-gray-500 mb-2">MARCAS</p>
-                  {MARCAS.map((marca) => (
+          {isMounted ? (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Menú</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px]">
+                <nav className="flex flex-col gap-4 mt-8">
+                  {navLinks.map((link) => (
                     <Link
-                      key={marca.id}
-                      href={`/#${marca.id}`}
-                      className="block py-2 text-gray-700 hover:text-primary"
+                      key={link.href}
+                      href={link.href}
+                      className="text-lg font-medium text-gray-700 hover:text-primary transition-colors uppercase"
                     >
-                      {marca.nombre}
+                      {link.label}
                     </Link>
                   ))}
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+                  <div className="border-t pt-4 mt-4">
+                    <p className="text-sm font-semibold text-gray-500 mb-2">MARCAS</p>
+                    {MARCAS.map((marca) => (
+                      <Link
+                        key={marca.id}
+                        href={`/#${marca.id}`}
+                        className="block py-2 text-gray-700 hover:text-primary"
+                      >
+                        {marca.nombre}
+                      </Link>
+                    ))}
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
 

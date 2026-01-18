@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Image from 'next/image';
 import {
@@ -8,20 +8,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Moto, getWhatsAppLink } from '@/types';
+import { DEFAULT_WHATSAPP_NUMBER, Moto, getWhatsAppLink } from '@/types';
 import { MessageCircle, Fuel, Gauge, Disc, Zap } from 'lucide-react';
 
 interface MotoModalProps {
   moto: Moto | null;
   isOpen: boolean;
   onClose: () => void;
+  whatsappNumber?: string;
 }
 
-export function MotoModal({ moto, isOpen, onClose }: MotoModalProps) {
+export function MotoModal({ moto, isOpen, onClose, whatsappNumber }: MotoModalProps) {
   if (!moto) return null;
 
   const handleWhatsAppClick = () => {
-    window.open(getWhatsAppLink(moto.nombre, moto.marca), '_blank');
+    const number = whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
+    window.open(getWhatsAppLink(number, moto.nombre, moto.marca), '_blank');
   };
 
   const specs = [
@@ -37,7 +39,7 @@ export function MotoModal({ moto, isOpen, onClose }: MotoModalProps) {
       <DialogContent className="max-w-2xl p-0 overflow-hidden">
         <div className="grid md:grid-cols-2">
           {/* Imagen */}
-          <div className="relative h-64 md:h-full min-h-[300px] bg-gradient-to-br from-gray-100 to-gray-50">
+          <div className="relative h-64 md:h-full min-h-75 bg-linear-to-br from-gray-100 to-gray-50">
             <Image
               src={moto.imagen}
               alt={`${moto.marca} ${moto.nombre}`}
@@ -67,15 +69,10 @@ export function MotoModal({ moto, isOpen, onClose }: MotoModalProps) {
               </h4>
               <div className="space-y-2">
                 {specs.map((spec, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 text-sm"
-                  >
+                  <div key={index} className="flex items-start gap-3 text-sm">
                     <spec.icon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <div>
-                      <span className="font-medium text-gray-900">
-                        {spec.label}:
-                      </span>{' '}
+                      <span className="font-medium text-gray-900">{spec.label}:</span>{' '}
                       <span className="text-gray-600">{spec.value}</span>
                     </div>
                   </div>
@@ -94,7 +91,7 @@ export function MotoModal({ moto, isOpen, onClose }: MotoModalProps) {
             </Button>
 
             <p className="mt-3 text-xs text-center text-gray-500">
-              100% Financiada • Sin anticipo
+              100% financiada · Sin anticipo
             </p>
           </div>
         </div>
@@ -102,3 +99,4 @@ export function MotoModal({ moto, isOpen, onClose }: MotoModalProps) {
     </Dialog>
   );
 }
+

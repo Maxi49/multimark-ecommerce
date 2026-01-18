@@ -3,25 +3,35 @@
 import Image from 'next/image';
 import { Moto } from '@/types';
 import { ArrowRight } from 'lucide-react';
+import { getMotoImageUrl } from '@/lib/cloudinary-url';
 
 interface MotoCardProps {
   moto: Moto;
   onClick: (moto: Moto) => void;
+  imageHeight?: number;
 }
 
-export function MotoCard({ moto, onClick }: MotoCardProps) {
+export function MotoCard({ moto, onClick, imageHeight }: MotoCardProps) {
+  const resolvedImageHeight =
+    typeof imageHeight === 'number' && Number.isFinite(imageHeight) ? imageHeight : 192;
+
+  const imageUrl = getMotoImageUrl(moto.imagen);
+
   return (
     <div
       className="group cursor-pointer text-center p-4 transition-all duration-300 hover:bg-gray-50 rounded-xl"
       onClick={() => onClick(moto)}
     >
       {/* Imagen Limpia */}
-      <div className="relative h-48 w-full mb-6 transition-transform duration-500 group-hover:scale-105">
+      <div
+        className="relative w-full mb-6 transition-transform duration-500 group-hover:scale-105"
+        style={{ height: `${resolvedImageHeight}px` }}
+      >
          <Image
-            src={moto.imagen}
+            src={imageUrl}
             alt={`${moto.marca} ${moto.nombre}`}
             fill
-            className="object-contain mix-blend-multiply"
+            className="object-contain" // Quitamos mix-blend-multiply porque ahora confiamos en el PNG
           />
       </div>
 
