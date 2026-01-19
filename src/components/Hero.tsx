@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { MotoModal } from '@/components/MotoModal';
 import { cn } from '@/lib/utils';
 import { getMotoImageUrl } from '@/lib/cloudinary-url';
 import { Moto } from '@/types';
@@ -8,10 +9,12 @@ import { Moto } from '@/types';
 interface HeroProps {
   heroMotos?: Moto[];
   imageScale?: number;
+  whatsappNumber?: string;
 }
 
-export function Hero({ heroMotos = [], imageScale }: HeroProps) {
+export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedMoto, setSelectedMoto] = useState<Moto | null>(null);
 
   // Auto-advance carousel if more than 1 moto
   useEffect(() => {
@@ -38,14 +41,15 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
     : 'MODELOS EXCLUSIVOS';
 
   return (
-    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white py-10 md:py-0">
+    <>
+      <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white py-10 md:py-0">
       {/* Abstract Background Element - Minimal Gray Shape */}
       <div className="absolute right-0 top-0 h-full w-2/3 bg-gray-50/80 -skew-x-12 translate-x-1/4 z-0" />
 
       <div className="container mx-auto px-6 md:px-4 relative z-10">
         <div className="grid lg:grid-cols-5 gap-8 items-center">
           {/* Content (2 cols) */}
-          <div className="lg:col-span-2 space-y-6 md:space-y-8">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8 text-center md:text-left">
             <div>
               <p className="font-script text-lg text-gray-700">
                 La evolución del movimiento
@@ -59,12 +63,12 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
               </h1>
             </div>
 
-            <p className="text-gray-600 text-lg leading-relaxed max-w-md">
+            <p className="text-gray-600 text-lg leading-relaxed max-w-md mx-auto md:mx-0">
               Descubrí nuestra selección premium de motocicletas.
               Financiación exclusiva del 100% y entrega inmediata.
             </p>
 
-            <div className="flex flex-wrap gap-3 md:gap-4 pt-2 md:pt-4">
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 pt-2 md:pt-4">
               <Button
                 onClick={scrollToCatalogo}
                 size="lg"
@@ -89,7 +93,7 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
             {currentMoto && (
               <div
                 key={currentMoto.id}
-                className="absolute top-10 right-10 z-20 bg-white/80 backdrop-blur-sm border border-gray-200 px-6 py-3 rounded-2xl shadow-sm animate-in fade-in-0 slide-in-from-bottom-2 duration-500"
+                className="absolute top-10 left-1/2 -translate-x-1/2 z-20 bg-white/80 backdrop-blur-sm border border-gray-200 px-6 py-3 rounded-2xl shadow-sm pointer-events-none animate-in fade-in-0 slide-in-from-bottom-2 duration-500 md:top-10 md:left-auto md:right-10 md:translate-x-0"
               >
                 <p className="font-bebas text-xl text-gray-800 uppercase tracking-wider">
                   {displayName}
@@ -104,9 +108,19 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
                   className={cn(
                     "absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out will-change-transform will-change-opacity motion-reduce:transition-none",
                     idx === currentIndex
-                      ? "opacity-100 translate-y-0 scale-100"
+                      ? "opacity-100 translate-y-0 scale-100 cursor-pointer"
                       : "opacity-0 translate-y-3 scale-[0.98] pointer-events-none"
                   )}
+                  onClick={() => setSelectedMoto(moto)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelectedMoto(moto);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={idx === currentIndex ? 0 : -1}
+                  aria-label={`Ver detalles de ${moto.marca} ${moto.nombre}`}
                 >
                   <div className="relative h-full w-full">
                     <Image
@@ -156,6 +170,13 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+      <MotoModal
+        moto={selectedMoto}
+        isOpen={!!selectedMoto}
+        onClose={() => setSelectedMoto(null)}
+        whatsappNumber={whatsappNumber}
+      />
+    </>
   );
 }

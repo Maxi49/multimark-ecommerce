@@ -26,14 +26,77 @@ export function MotoCarousel({
       ? catalogImageHeight
       : 192;
 
+  const normalizedQuery = searchQuery?.trim().toLowerCase() ?? '';
+  const tokens = normalizedQuery.split(/\s+/).filter(Boolean);
+
+  const toSearchableText = (moto: Moto) =>
+    [
+      moto.marca,
+      moto.nombre,
+      moto.tipo,
+      moto.specs?.cilindrada,
+      moto.specs?.motor,
+      moto.specs?.frenos,
+      moto.specs?.arranque,
+      moto.specs?.capacidadTanque,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+  const matchesQuery = (moto: Moto) => {
+    if (tokens.length === 0) return true;
+    const haystack = toSearchableText(moto);
+    return tokens.every((token) => haystack.includes(token));
+  };
+
+  const getMatchScore = (moto: Moto) => {
+    const fields = [
+      moto.nombre,
+      moto.marca,
+      moto.tipo,
+      moto.specs?.cilindrada,
+      moto.specs?.motor,
+      moto.specs?.frenos,
+      moto.specs?.arranque,
+      moto.specs?.capacidadTanque,
+    ].map((value) => (value ?? '').toLowerCase());
+
+    let bestIndex = fields.length;
+    let bestTokenCount = 0;
+
+    fields.forEach((value, index) => {
+      if (!value) return;
+      const tokenCount = tokens.filter((token) => value.includes(token)).length;
+      if (tokenCount === 0) return;
+      if (index < bestIndex) {
+        bestIndex = index;
+        bestTokenCount = tokenCount;
+        return;
+      }
+      if (index === bestIndex && tokenCount > bestTokenCount) {
+        bestTokenCount = tokenCount;
+      }
+    });
+
+    return { bestIndex, bestTokenCount };
+  };
+
   // Si hay búsqueda, mostrar resultados filtrados
-  if (searchQuery) {
-    const query = searchQuery.toLowerCase();
-    const filteredMotos = motos.filter(
-      (moto) =>
-        moto.marca.toLowerCase().includes(query) ||
-        moto.nombre.toLowerCase().includes(query)
-    );
+  if (tokens.length) {
+    const filteredMotos = motos
+      .filter(matchesQuery)
+      .map((moto) => ({ moto, score: getMatchScore(moto) }))
+      .sort((a, b) => {
+        if (a.score.bestIndex !== b.score.bestIndex) {
+          return a.score.bestIndex - b.score.bestIndex;
+        }
+        if (a.score.bestTokenCount !== b.score.bestTokenCount) {
+          return b.score.bestTokenCount - a.score.bestTokenCount;
+        }
+        return a.moto.nombre.localeCompare(b.moto.nombre);
+      })
+      .map((item) => item.moto);
 
     return (
       <section className="py-12">

@@ -1,6 +1,7 @@
 ﻿'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Hero } from '@/components/Hero';
@@ -15,18 +16,32 @@ interface HomeClientProps {
 }
 
 export function HomeClient({ motos, settings }: HomeClientProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+  const queryFromUrl = (searchParams.get('q') ?? '').trim();
+  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
 
   const heroMotos = motos.filter((m) => m.show_in_hero);
+
+  useEffect(() => {
+    setSearchQuery(queryFromUrl);
+  }, [queryFromUrl]);
 
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollReveal />
-      <Header onSearch={setSearchQuery} logoUrl={settings.logoUrl} />
+      <Header
+        onSearch={setSearchQuery}
+        logoUrl={settings.logoUrl}
+        initialQuery={queryFromUrl}
+      />
 
       <main className="flex-1">
         {!searchQuery && (
-          <Hero heroMotos={heroMotos} imageScale={settings.heroImageScale} />
+          <Hero
+            heroMotos={heroMotos}
+            imageScale={settings.heroImageScale}
+            whatsappNumber={settings.whatsappNumber}
+          />
         )}
         <MotoCarousel
           searchQuery={searchQuery}

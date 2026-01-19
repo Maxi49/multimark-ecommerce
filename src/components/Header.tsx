@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { Home, LayoutGrid, Search, Users, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useCallback, useEffect, useState } from 'react';
+import { Home, LayoutGrid, Search, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { MARCAS } from '@/types';
 import { getLogoImageUrl } from '@/lib/cloudinary-url';
@@ -13,12 +13,13 @@ import { cn } from '@/lib/utils';
 interface HeaderProps {
   onSearch?: (query: string) => void;
   logoUrl?: string;
+  initialQuery?: string;
 }
 
-export function Header({ onSearch, logoUrl }: HeaderProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+export function Header({ onSearch, logoUrl, initialQuery }: HeaderProps) {
+  const [searchQuery, setSearchQuery] = useState(initialQuery ?? '');
   const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,9 +33,38 @@ export function Header({ onSearch, logoUrl }: HeaderProps) {
 
   const logoSrc = getLogoImageUrl(logoUrl || '/images/logo.png');
 
+  const runSearch = useCallback(
+    (query: string) => {
+      const normalizedQuery = query.trim();
+
+      if (onSearch) {
+        onSearch(normalizedQuery);
+        return;
+      }
+
+      if (!normalizedQuery) {
+        return;
+      }
+
+      router.push(`/?q=${encodeURIComponent(normalizedQuery)}`);
+    },
+    [onSearch, router]
+  );
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      runSearch(searchQuery);
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery, runSearch]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch?.(searchQuery);
+    runSearch(searchQuery);
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   };
 
   const navLinks = [
@@ -105,52 +135,25 @@ export function Header({ onSearch, logoUrl }: HeaderProps) {
             </div>
           </nav>
 
-          {/* Search */}
-          <div className="flex items-center gap-2">
-            {/* Search Desktop */}
-            <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Buscar motos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
-                />
-              </div>
-            </form>
-
-            {/* Search Mobile Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-            >
-              {isSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
-            </Button>
-          </div>
         </div>
-
-        {/* Mobile Search Bar */}
-        {isSearchOpen && (
-          <div className="md:hidden border-t p-4">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Buscar motos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full"
-                />
-              </div>
-            </form>
-          </div>
-        )}
       </header>
+
+      <div className="w-full border-b border-gray-100 bg-white">
+        <div className="container mx-auto px-4 py-3">
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="search"
+                placeholder="Buscar motos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-full"
+              />
+            </div>
+          </form>
+        </div>
+      </div>
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/90">
         <div className="mx-auto flex max-w-sm items-center justify-between px-6 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">

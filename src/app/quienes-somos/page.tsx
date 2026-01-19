@@ -41,7 +41,7 @@ export default async function QuienesSomos() {
       <main className="flex-1">
         <ScrollReveal />
         {/* Hero */}
-        <section className="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <section className="relative py-24 bg-linear-to-br from-gray-900 via-gray-500 to-black">
           <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
           <div className="container mx-auto px-4 text-center">
             <h1 className="font-bebas text-5xl md:text-6xl text-white uppercase mb-4">
