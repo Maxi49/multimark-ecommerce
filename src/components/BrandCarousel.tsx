@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKeenSlider } from 'keen-slider/react';
 import type { KeenSliderInstance } from 'keen-slider';
 import { Moto } from '@/types';
@@ -17,8 +17,17 @@ const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
 export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarouselProps) {
-  const enableCarousel = motos.length > 3;
+  const [isMobile, setIsMobile] = useState(false);
+  const enableCarousel = isMobile ? motos.length > 1 : motos.length > 3;
   const [tweenValues, setTweenValues] = useState<number[]>([]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const handleChange = () => setIsMobile(mediaQuery.matches);
+    handleChange();
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const updateTweenValues = useCallback((slider: KeenSliderInstance) => {
     const slides = slider.track.details.slides;
@@ -34,6 +43,7 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
     () => (slider: KeenSliderInstance) => {
       let timeout: ReturnType<typeof setTimeout> | null = null;
       let mouseOver = false;
+      let pausedUntil = 0;
 
       const clearNextTimeout = () => {
         if (timeout) clearTimeout(timeout);
@@ -42,14 +52,22 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
       const nextTimeout = () => {
         clearNextTimeout();
         if (mouseOver) return;
+        const now = Date.now();
+        const waitForPause = Math.max(0, pausedUntil - now);
+        const delay = waitForPause > 0 ? waitForPause : 3000;
         timeout = setTimeout(() => {
           slider.next();
-        }, 3000);
+        }, delay);
+      };
+
+      const pauseForInteraction = () => {
+        pausedUntil = Date.now() + 5000;
+        nextTimeout();
       };
 
       const handleMouseEnter = () => {
         mouseOver = true;
-        clearNextTimeout();
+        pauseForInteraction();
       };
 
       const handleMouseLeave = () => {
@@ -60,14 +78,16 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
       slider.on('created', () => {
         slider.container.addEventListener('mouseenter', handleMouseEnter);
         slider.container.addEventListener('mouseleave', handleMouseLeave);
+        slider.container.addEventListener('pointerdown', pauseForInteraction);
         nextTimeout();
       });
-      slider.on('dragStarted', clearNextTimeout);
+      slider.on('dragStarted', pauseForInteraction);
       slider.on('animationEnded', nextTimeout);
       slider.on('updated', nextTimeout);
       slider.on('destroyed', () => {
         slider.container.removeEventListener('mouseenter', handleMouseEnter);
         slider.container.removeEventListener('mouseleave', handleMouseLeave);
+        slider.container.removeEventListener('pointerdown', pauseForInteraction);
         clearNextTimeout();
       });
     },

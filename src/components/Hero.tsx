@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { MotoModal } from '@/components/MotoModal';
@@ -15,12 +15,21 @@ interface HeroProps {
 export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedMoto, setSelectedMoto] = useState<Moto | null>(null);
+  const lastInteractionRef = useRef(0);
+
+  const registerInteraction = () => {
+    lastInteractionRef.current = Date.now();
+  };
 
   // Auto-advance carousel if more than 1 moto
   useEffect(() => {
     if (heroMotos.length <= 1) return;
 
     const interval = setInterval(() => {
+      const now = Date.now();
+      if (now - lastInteractionRef.current < 5000) {
+        return;
+      }
       setCurrentIndex((prev) => (prev + 1) % heroMotos.length);
     }, 5000); // 5 seconds per slide
 
@@ -111,10 +120,15 @@ export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) 
                       ? "opacity-100 translate-y-0 scale-100 cursor-pointer"
                       : "opacity-0 translate-y-3 scale-[0.98] pointer-events-none"
                   )}
-                  onClick={() => setSelectedMoto(moto)}
+                  onClick={() => {
+                    registerInteraction();
+                    setSelectedMoto(moto);
+                  }}
+                  onPointerDown={registerInteraction}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
+                      registerInteraction();
                       setSelectedMoto(moto);
                     }
                   }}
@@ -159,7 +173,10 @@ export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) 
                 {heroMotos.map((_, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setCurrentIndex(idx)}
+                    onClick={() => {
+                      registerInteraction();
+                      setCurrentIndex(idx);
+                    }}
                     className={`h-2 rounded-full transition-all ${
                       idx === currentIndex ? 'w-8 bg-primary' : 'w-2 bg-gray-300 hover:bg-gray-400'
                     }`}

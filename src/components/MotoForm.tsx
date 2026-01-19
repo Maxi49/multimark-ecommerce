@@ -38,6 +38,16 @@ const SPEC_OPTIONS = {
   capacidadTanque: ['3.5L', '4L', '5L', '6L', '9L', '12L', '15L'],
 };
 
+const REQUIRED_SPEC_FIELDS: { key: keyof Moto['specs']; label: string }[] = [
+  { key: 'cilindrada', label: 'Cilindrada' },
+  { key: 'motor', label: 'Motor' },
+  { key: 'frenos', label: 'Frenos' },
+  { key: 'arranque', label: 'Arranque' },
+  { key: 'capacidadTanque', label: 'Capacidad tanque' },
+];
+
+const hasText = (value?: string) => typeof value === 'string' && value.trim().length > 0;
+
 interface SpecInputProps {
   label: string;
   value?: string;
@@ -120,12 +130,29 @@ export function MotoForm({ moto, onSave, isOpen, onClose }: MotoFormProps) {
     setFormError('');
   }, [moto, isOpen]);
 
+  const getMissingFields = () => {
+    const missing: string[] = [];
+    if (!hasText(formData.marca)) missing.push('Marca');
+    if (!hasText(formData.nombre)) missing.push('Nombre');
+    if (!hasText(formData.tipo)) missing.push('Tipo');
+    if (!hasText(formData.imagen)) missing.push('Imagen');
+
+    REQUIRED_SPEC_FIELDS.forEach(({ key, label }) => {
+      if (!hasText(formData.specs?.[key])) {
+        missing.push(label);
+      }
+    });
+
+    return missing;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
-    if (!formData.imagen) {
-      setFormError('Subí una imagen para continuar.');
+    const missingFields = getMissingFields();
+    if (missingFields.length > 0) {
+      setFormError(`Completa los campos obligatorios: ${missingFields.join(', ')}.`);
       return;
     }
 

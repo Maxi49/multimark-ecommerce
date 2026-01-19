@@ -140,6 +140,28 @@ export function Header({ onSearch, logoUrl, initialQuery }: HeaderProps) {
 
       <div className="w-full border-b border-gray-100 bg-white">
         <div className="container mx-auto px-4 py-3">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Link
+              href="/"
+              className="rounded-full border border-gray-200 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700 transition hover:border-primary hover:text-primary"
+            >
+              Sin filtros
+            </Link>
+            {MARCAS.map((marca) => (
+              <Link
+                key={marca.id}
+                href={`/marca/${marca.id}`}
+                className="rounded-full border border-gray-200 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700 transition hover:border-primary hover:text-primary"
+              >
+                {marca.nombre}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full border-b border-gray-100 bg-white">
+        <div className="container mx-auto px-4 py-3">
           <form onSubmit={handleSearch}>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

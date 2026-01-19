@@ -109,14 +109,6 @@ export function Footer({
                   Quiénes Somos
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/admin/login"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
-                >
-                  Administración
-                </Link>
-              </li>
             </ul>
           </div>
 

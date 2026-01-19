@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import { useEffect } from 'react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -10,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DEFAULT_WHATSAPP_NUMBER, Moto, getWhatsAppLink } from '@/types';
 import { MessageCircle, Fuel, Gauge, Disc, Zap } from 'lucide-react';
+import { addRecentViewedId } from '@/lib/recent-viewed';
 
 interface MotoModalProps {
   moto: Moto | null;
@@ -19,6 +21,12 @@ interface MotoModalProps {
 }
 
 export function MotoModal({ moto, isOpen, onClose, whatsappNumber }: MotoModalProps) {
+  useEffect(() => {
+    if (isOpen && moto?.id) {
+      addRecentViewedId(moto.id);
+    }
+  }, [isOpen, moto?.id]);
+
   if (!moto) return null;
 
   const handleWhatsAppClick = () => {
