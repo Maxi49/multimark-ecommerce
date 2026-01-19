@@ -1,7 +1,7 @@
 const CLOUDINARY_UPLOAD_SEGMENT = '/upload/';
 
 const MOTO_PAD_TRANSFORM = 'e_bgremoval,e_trim,c_pad,b_transparent,w_1200,h_800';
-const LOGO_TRIM_TRANSFORM = 'e_bgremoval,e_trim';
+const CLOUDINARY_TRANSFORM_REGEX = /(\/upload\/)(?:[^/]+\/)*?(v\d+\/)/;
 
 const isCloudinaryUrl = (url: string) =>
   url.includes('cloudinary') && url.includes(CLOUDINARY_UPLOAD_SEGMENT);
@@ -28,8 +28,13 @@ export const applyCloudinaryTransform = (url: string, transform: string) => {
   return `${prefix}${CLOUDINARY_UPLOAD_SEGMENT}${transform}/${remainder}`;
 };
 
+export const stripCloudinaryTransform = (url: string) => {
+  if (!isCloudinaryUrl(url)) return url;
+  return url.replace(CLOUDINARY_TRANSFORM_REGEX, '$1$2');
+};
+
 export const getMotoImageUrl = (url: string) =>
   applyCloudinaryTransform(url, MOTO_PAD_TRANSFORM);
 
 export const getLogoImageUrl = (url: string) =>
-  applyCloudinaryTransform(url, LOGO_TRIM_TRANSFORM);
+  stripCloudinaryTransform(url);

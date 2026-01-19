@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { CheckCircle2, Loader2, UploadCloud } from 'lucide-react';
+import { getLogoImageUrl } from '@/lib/cloudinary-url';
 
 interface ConfigTabSettings {
   logoUrl: string;
@@ -212,7 +213,7 @@ export function ConfigTab({ settings, onSettingsUpdate }: ConfigTabProps) {
           <div className="flex items-start gap-6">
             <div className="relative h-24 w-60 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
               <Image
-                src={settings.logoUrl}
+                src={getLogoImageUrl(settings.logoUrl)}
                 alt="Logo Preview"
                 fill
                 className="object-contain p-2"
@@ -220,8 +221,8 @@ export function ConfigTab({ settings, onSettingsUpdate }: ConfigTabProps) {
             </div>
             <div className="flex-1 space-y-2">
               <p className="text-xs text-gray-500">
-                Subí tu logo en formato PNG transparente.
-                El sistema lo optimiza automáticamente.
+                Subi tu logo en PNG con fondo transparente.
+                No se aplica eliminacion de fondo automaticamente.
               </p>
               <div className="flex items-center gap-2">
                 <input
@@ -250,13 +251,14 @@ export function ConfigTab({ settings, onSettingsUpdate }: ConfigTabProps) {
 
       {/* Map Section */}
       <div className="bg-white rounded-lg shadow p-8 space-y-6">
-        <h3 className="text-xl font-bold text-gray-800 border-b pb-4">Ubicación (Google Maps)</h3>
+        <h3 className="text-xl font-bold text-gray-800 border-b pb-4">Ubicacion (Google Maps)</h3>
         <div className="space-y-4">
           <Label className="block text-sm font-medium text-gray-700">
-            URL de Inserción (Embed) de Google Maps
+            URL de Insercion (Embed) de Google Maps
           </Label>
           <p className="text-xs text-gray-500">
-            Andá a Google Maps, buscá tu local, poné Compartir, Insertar un mapa y copiá el HTML o solo el link src.
+            Anda a Google Maps, busca tu local, pone Compartir, Insertar un mapa y copia
+            el HTML o solo el link src.
           </p>
           <div className="flex gap-2">
             <Input
@@ -286,10 +288,10 @@ export function ConfigTab({ settings, onSettingsUpdate }: ConfigTabProps) {
 
       {/* Image Size Section */}
       <div className="bg-white rounded-lg shadow p-8 space-y-6">
-        <h3 className="text-xl font-bold text-gray-800 border-b pb-4">Tamaño de imágenes</h3>
+        <h3 className="text-xl font-bold text-gray-800 border-b pb-4">Tamanio de imagenes</h3>
         <p className="text-xs text-gray-500">
-          Ajustá el tamaño del carrusel principal y del catálogo. El catálogo se adapta
-          automáticamente a la altura configurada.
+          Ajusta el tamanio del carrusel principal y del catalogo. El catalogo se adapta
+          automaticamente a la altura configurada.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -306,7 +308,7 @@ export function ConfigTab({ settings, onSettingsUpdate }: ConfigTabProps) {
             <p className="text-xs text-gray-500">Recomendado: 0.8 a 1.4.</p>
           </div>
           <div className="space-y-2">
-            <Label>Altura de imagen en catálogo (px)</Label>
+            <Label>Altura de imagen en catalogo (px)</Label>
             <Input
               type="number"
               step="1"
@@ -320,10 +322,9 @@ export function ConfigTab({ settings, onSettingsUpdate }: ConfigTabProps) {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button onClick={handleSaveImageSizes}>Guardar tamaños</Button>
+          <Button onClick={handleSaveImageSizes}>Guardar tamanos</Button>
         </div>
       </div>
-
       {/* Contact Section */}
       <div className="bg-white rounded-lg shadow p-8 space-y-6">
         <h3 className="text-xl font-bold text-gray-800 border-b pb-4">Contacto y Redes</h3>
@@ -404,3 +405,5 @@ export function ConfigTab({ settings, onSettingsUpdate }: ConfigTabProps) {
     </div>
   );
 }
+
+

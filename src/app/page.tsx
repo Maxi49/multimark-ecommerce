@@ -3,7 +3,6 @@ import { getPublicSettings } from '@/lib/settings';
 import { HomeClient } from '@/components/HomeClient';
 import { Moto } from '@/types';
 
-// Revalidate data every 0 seconds (always fresh)
 export const revalidate = 0;
 
 export default async function Home() {

@@ -21,7 +21,7 @@ export function LocationMap({ mapUrl }: LocationMapProps) {
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="w-full h-full grayscale hover:grayscale-0 transition-all duration-500"
+            className="w-full h-full transition-all duration-500"
           />
         </div>
         <div className="text-center mt-6 text-gray-600">

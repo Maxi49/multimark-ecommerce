@@ -38,14 +38,14 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
     : 'MODELOS EXCLUSIVOS';
 
   return (
-    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white">
+    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-white py-10 md:py-0">
       {/* Abstract Background Element - Minimal Gray Shape */}
       <div className="absolute right-0 top-0 h-full w-2/3 bg-gray-50/80 -skew-x-12 translate-x-1/4 z-0" />
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-6 md:px-4 relative z-10">
         <div className="grid lg:grid-cols-5 gap-8 items-center">
           {/* Content (2 cols) */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8">
             <div>
               <p className="font-script text-lg text-gray-700">
                 La evolución del movimiento
@@ -64,7 +64,7 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
               Financiación exclusiva del 100% y entrega inmediata.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-4">
+            <div className="flex flex-wrap gap-3 md:gap-4 pt-2 md:pt-4">
               <Button
                 onClick={scrollToCatalogo}
                 size="lg"
@@ -84,7 +84,7 @@ export function Hero({ heroMotos = [], imageScale }: HeroProps) {
           </div>
 
           {/* Image (3 cols) */}
-          <div className="lg:col-span-3 relative h-[500px] md:h-[600px] w-full flex items-center justify-center overflow-hidden">
+          <div className="lg:col-span-3 relative h-125 md:h-150 w-full flex items-center justify-center overflow-hidden">
             {/* Moto Name Label (Dynamic) */}
             {currentMoto && (
               <div

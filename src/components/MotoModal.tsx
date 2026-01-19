@@ -36,7 +36,7 @@ export function MotoModal({ moto, isOpen, onClose, whatsappNumber }: MotoModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden">
         <div className="grid md:grid-cols-2">
           {/* Imagen */}
           <div className="relative h-64 md:h-full min-h-75 bg-linear-to-br from-gray-100 to-gray-50">
@@ -99,4 +99,3 @@ export function MotoModal({ moto, isOpen, onClose, whatsappNumber }: MotoModalPr
     </Dialog>
   );
 }
-

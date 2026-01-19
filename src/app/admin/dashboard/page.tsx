@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/table';
 import { Plus, Pencil, Trash2, LogOut } from 'lucide-react';
 import Image from 'next/image';
+import { getLogoImageUrl } from '@/lib/cloudinary-url';
 import { ConfigTab } from '@/components/ConfigTab';
 
 interface DashboardSettings {
@@ -186,7 +187,7 @@ export default function DashboardPage() {
       <nav className="bg-white border-b px-8 py-3 flex justify-between items-center">
         <div className="relative h-12 w-40">
           <Image
-            src={settings.logoUrl}
+            src={getLogoImageUrl(settings.logoUrl)}
             alt="Multimark Motos"
             fill
             className="object-contain object-left"

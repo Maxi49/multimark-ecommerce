@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { Moto } from '@/types';
@@ -14,97 +14,175 @@ interface BrandCarouselProps {
 }
 
 export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarouselProps) {
-  // Configuración de Autoplay
+  const enableCarousel = motos.length > 3;
+  const { slides, repeatCount, groupSize } = useMemo(() => {
+    if (motos.length === 0) {
+      return { slides: [], repeatCount: 1, groupSize: 0 };
+    }
+
+    if (!enableCarousel) {
+      return {
+        slides: motos.map((moto) => ({ moto, key: moto.id })),
+        repeatCount: 1,
+        groupSize: motos.length,
+      };
+    }
+
+    const minLoopSlides = 8;
+    const baseRepeat = Math.ceil(minLoopSlides / motos.length);
+    const repeatCount = motos.length < minLoopSlides ? Math.max(3, baseRepeat) : 1;
+
+    if (repeatCount === 1) {
+      return {
+        slides: motos.map((moto) => ({ moto, key: moto.id })),
+        repeatCount,
+        groupSize: motos.length,
+      };
+    }
+
+    const slides = Array.from({ length: repeatCount }, (_, repeatIndex) =>
+      motos.map((moto) => ({ moto, key: `${moto.id}-${repeatIndex}` }))
+    ).flat();
+
+    return { slides, repeatCount, groupSize: motos.length };
+  }, [enableCarousel, motos]);
+
+  const startIndex = repeatCount >= 3 ? groupSize : 0;
   const autoplay = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })
   );
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: 'center', skipSnaps: false },
-    [autoplay.current]
+    {
+      loop: enableCarousel,
+      align: 'center',
+      skipSnaps: !enableCarousel,
+      draggable: enableCarousel,
+      startIndex,
+    },
+    enableCarousel ? [autoplay.current] : []
   );
 
   const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Efecto de escala (3D)
   const [tweenValues, setTweenValues] = useState<number[]>([]);
 
-  const onScroll = useCallback((_emblaApi?: unknown, eventName?: string) => {
-    if (!emblaApi) return;
+  const onScroll = useCallback(
+    (_emblaApi?: unknown, eventName?: string) => {
+      if (!emblaApi || !enableCarousel) return;
 
-    const engine = emblaApi.internalEngine();
-    const scrollProgress = emblaApi.scrollProgress();
-    const slidesInView = emblaApi.slidesInView();
-    const isScrollEvent = eventName === 'scroll';
+      const engine = emblaApi.internalEngine();
+      const scrollProgress = emblaApi.scrollProgress();
+      const slidesInView = emblaApi.slidesInView();
+      const isScrollEvent = eventName === 'scroll';
 
-    const styles = emblaApi.scrollSnapList().map((scrollSnap, index) => {
-      let diffToTarget = scrollSnap - scrollProgress;
-      const slidesInSnap = engine.slideRegistry[index];
+      const styles = emblaApi.scrollSnapList().map((scrollSnap, index) => {
+        let diffToTarget = scrollSnap - scrollProgress;
+        const slidesInSnap = engine.slideRegistry[index];
 
-      slidesInSnap.forEach((slideIndex) => {
-        if (isScrollEvent && !slidesInView.includes(slideIndex)) return;
+        slidesInSnap.forEach((slideIndex) => {
+          if (isScrollEvent && !slidesInView.includes(slideIndex)) return;
 
-        if (engine.options.loop) {
-          engine.slideLooper.loopPoints.forEach((loopItem) => {
-            const target = loopItem.target();
+          if (engine.options.loop) {
+            engine.slideLooper.loopPoints.forEach((loopItem) => {
+              const target = loopItem.target();
 
-            if (slideIndex === loopItem.index && target !== 0) {
-              const sign = Math.sign(target);
+              if (slideIndex === loopItem.index && target !== 0) {
+                const sign = Math.sign(target);
 
-              if (sign === -1) {
-                diffToTarget = scrollSnap - (1 + scrollProgress);
+                if (sign === -1) {
+                  diffToTarget = scrollSnap - (1 + scrollProgress);
+                }
+                if (sign === 1) {
+                  diffToTarget = scrollSnap + (1 - scrollProgress);
+                }
               }
-              if (sign === 1) {
-                diffToTarget = scrollSnap + (1 - scrollProgress);
-              }
-            }
-          });
-        }
+            });
+          }
+        });
+
+        const scale = 1 - Math.abs(diffToTarget * 0.2);
+        return Math.min(Math.max(scale, 0.85), 1.1);
       });
 
-      // Lógica simplificada de escala:
-      // Cuanto más cerca del 0 (centro), más grande (1.1). Lejos -> 0.85
-      const TWEEN_FACTOR_BASE = 0.2; // Cuánto se achica
-      const scale = 1 - Math.abs(diffToTarget * TWEEN_FACTOR_BASE);
-
-      // Clampear valores
-      const number = Math.min(Math.max(scale, 0.85), 1.1);
-      return number;
-    });
-
-    // NOTA: Para React puro y performante, a veces es mejor manipular el DOM directamente
-    // pero intentaremos con estado primero si no son muchos items.
-    // Si son muchos, esto puede ser lento. Para MVP con pocas motos por marca está bien.
-    setTweenValues(styles);
-  }, [emblaApi]);
+      setTweenValues(styles);
+    },
+    [emblaApi, enableCarousel]
+  );
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !enableCarousel) return;
 
     emblaApi.on('scroll', onScroll);
     emblaApi.on('reInit', onScroll);
-    onScroll(); // Init
+    onScroll();
 
     return () => {
       emblaApi.off('scroll', onScroll);
       emblaApi.off('reInit', onScroll);
     };
-  }, [emblaApi, onScroll]);
+  }, [emblaApi, enableCarousel, onScroll]);
 
-  // Lógica de Touch Inteligente (10s delay)
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.reInit();
+  }, [emblaApi, enableCarousel, slides.length, startIndex]);
+
+  useEffect(() => {
+    if (!emblaApi || !enableCarousel || repeatCount < 3 || groupSize === 0) return;
+
+    const handleWrap = () => {
+      const selected = emblaApi.selectedScrollSnap();
+      const lastGroupStart = slides.length - groupSize;
+
+      if (selected < groupSize) {
+        emblaApi.scrollTo(selected + groupSize, true);
+        return;
+      }
+
+      if (selected >= lastGroupStart) {
+        emblaApi.scrollTo(selected - groupSize, true);
+      }
+    };
+
+    emblaApi.on('select', handleWrap);
+    emblaApi.on('reInit', handleWrap);
+    return () => {
+      emblaApi.off('select', handleWrap);
+      emblaApi.off('reInit', handleWrap);
+    };
+  }, [emblaApi, enableCarousel, repeatCount, groupSize, slides.length]);
+
   const handleTouchStart = () => {
+    if (!enableCarousel) return;
     autoplay.current.stop();
     if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
   };
 
   const handleTouchEnd = () => {
-    // Reiniciar autoplay después de 10 segundos
+    if (!enableCarousel) return;
     resumeTimeoutRef.current = setTimeout(() => {
       if (autoplay.current && emblaApi) {
         autoplay.current.play();
       }
     }, 10000);
   };
+
+  if (!enableCarousel) {
+    return (
+      <div className="py-8">
+        <div className="flex flex-wrap justify-center gap-6">
+          {motos.map((moto) => (
+            <div
+              key={moto.id}
+              className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.33%-1rem)]"
+            >
+              <MotoCard moto={moto} onClick={onMotoClick} imageHeight={imageHeight} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -114,14 +192,13 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
       onTouchEnd={handleTouchEnd}
     >
       <div className="flex touch-pan-y -ml-4">
-        {motos.map((moto, index) => {
-          // Si el array de escalas aún no está listo, usar 1
-          const scale = tweenValues[index] || 0.9;
+        {slides.map(({ moto, key }, index) => {
+          const scale = tweenValues.length ? tweenValues[index] || 0.9 : 1;
           const isCenter = scale > 1.0;
 
           return (
             <div
-              key={moto.id}
+              key={key}
               className={cn(
                 'flex-[0_0_80%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] pl-4 transition-[transform,opacity] duration-500 ease-out'
               )}

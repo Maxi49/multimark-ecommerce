@@ -27,11 +27,13 @@ export function MotoCard({ moto, onClick, imageHeight }: MotoCardProps) {
         className="relative w-full mb-6 transition-transform duration-500 group-hover:scale-105"
         style={{ height: `${resolvedImageHeight}px` }}
       >
-         <Image
+          <Image
             src={imageUrl}
             alt={`${moto.marca} ${moto.nombre}`}
             fill
             className="object-contain" // Quitamos mix-blend-multiply porque ahora confiamos en el PNG
+            sizes="(max-width: 640px) 80vw, (max-width: 1024px) 33vw, 25vw"
+            quality={95}
           />
       </div>
 

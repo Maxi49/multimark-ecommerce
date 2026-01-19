@@ -1,5 +1,4 @@
-﻿import Link from 'next/link';
-import Image from 'next/image';
+import Link from 'next/link';
 import { Facebook, Instagram, Phone, MapPin, Mail } from 'lucide-react';
 import { MARCAS } from '@/types';
 
@@ -13,14 +12,12 @@ interface FooterProps {
 }
 
 export function Footer({
-  logoUrl,
   phone,
   address,
   email,
   instagramUrl,
   facebookUrl,
 }: FooterProps) {
-  const logoSrc = logoUrl || '/images/logo.png';
   const resolvedPhone = phone || '+54 9 11 1234-5678';
   const resolvedAddress = address || 'Av. Ejemplo 1234, Buenos Aires, Argentina';
   const resolvedEmail = email || 'info@multimarkmotos.com';
@@ -33,13 +30,11 @@ export function Footer({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo y descripción */}
           <div className="space-y-4">
-            <div className="relative h-16 w-48 bg-white/10 p-2 rounded-lg backdrop-blur-sm">
-              <Image
-                src={logoSrc}
-                alt="Multimark Motos"
-                fill
-                className="object-contain object-left"
-              />
+            <div className="inline-flex flex-col leading-none">
+              <span className="font-bebas text-3xl uppercase tracking-[0.2em] text-white">
+                Multimark
+              </span>
+              <span className="font-script text-2xl text-primary -mt-1">motos</span>
             </div>
             <p className="text-gray-400 text-sm">
               Tu concesionario de confianza. Motos 100% financiadas para que puedas

@@ -15,6 +15,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Lock, Mail, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getLogoImageUrl } from '@/lib/cloudinary-url';
 
 interface LoginClientProps {
   logoUrl?: string;
@@ -26,6 +27,7 @@ export function LoginClient({ logoUrl }: LoginClientProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const resolvedLogoUrl = getLogoImageUrl(logoUrl || '/images/logo.png');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +64,7 @@ export function LoginClient({ logoUrl }: LoginClientProps) {
         <CardHeader className="text-center space-y-4">
           <div className="relative h-20 w-64 mx-auto mb-6">
             <Image
-              src={logoUrl || '/images/logo.png'}
+              src={resolvedLogoUrl}
               alt="Multimark Motos"
               fill
               className="object-contain"
