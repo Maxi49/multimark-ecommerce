@@ -140,10 +140,10 @@ export function Header({ onSearch, logoUrl, initialQuery }: HeaderProps) {
 
       <div className="w-full border-b border-gray-100 bg-white">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1 md:flex-wrap md:justify-center md:overflow-visible md:whitespace-normal">
             <Link
               href="/"
-              className="rounded-full border border-gray-200 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700 transition hover:border-primary hover:text-primary"
+              className="shrink-0 rounded-full border border-gray-200 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700 transition hover:border-primary hover:text-primary"
             >
               Sin filtros
             </Link>
@@ -151,7 +151,7 @@ export function Header({ onSearch, logoUrl, initialQuery }: HeaderProps) {
               <Link
                 key={marca.id}
                 href={`/marca/${marca.id}`}
-                className="rounded-full border border-gray-200 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700 transition hover:border-primary hover:text-primary"
+                className="shrink-0 rounded-full border border-gray-200 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-gray-700 transition hover:border-primary hover:text-primary"
               >
                 {marca.nombre}
               </Link>

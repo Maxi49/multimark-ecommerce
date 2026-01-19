@@ -20,6 +20,10 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
   const [isMobile, setIsMobile] = useState(false);
   const enableCarousel = isMobile ? motos.length > 1 : motos.length > 3;
   const [tweenValues, setTweenValues] = useState<number[]>([]);
+  const carouselMotos =
+    isMobile && enableCarousel && motos.length < 3
+      ? [...motos, ...motos]
+      : motos;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 767px)');
@@ -135,12 +139,12 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
   return (
     <div className="py-8">
       <div ref={sliderRef} className="keen-slider">
-        {motos.map((moto, index) => {
+        {carouselMotos.map((moto, index) => {
           const scale = tweenValues.length ? tweenValues[index] || 0.9 : 1;
           const isCenter = scale > 1.0;
 
           return (
-            <div key={moto.id} className="keen-slider__slide">
+            <div key={`${moto.id}-${index}`} className="keen-slider__slide">
               <div
                 className={cn(
                   'transition-[transform,opacity,box-shadow] duration-500 ease-out',
