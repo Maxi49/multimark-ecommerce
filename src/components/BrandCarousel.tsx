@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useKeenSlider } from 'keen-slider/react';
 import type { KeenSliderInstance } from 'keen-slider';
 import { Moto } from '@/types';
 import { MotoCard } from './MotoCard';
 import { cn } from '@/lib/utils';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BrandCarouselProps {
   motos: Moto[];
@@ -20,6 +21,8 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
   const enableCarousel = motos.length > 1;
   const showDesktopGrid = motos.length <= 3;
   const [tweenValues, setTweenValues] = useState<number[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const pauseAutoplayRef = useRef<(() => void) | null>(null);
   const carouselMotos =
     enableCarousel && motos.length < 3 ? [...motos, ...motos] : motos;
 
@@ -32,6 +35,23 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
     });
     setTweenValues(values);
   }, []);
+
+  const updateCurrentSlide = useCallback(
+    (slider: KeenSliderInstance) => {
+      if (!motos.length) return;
+      const relIndex = slider.track.details.rel;
+      setCurrentSlide(relIndex % motos.length);
+    },
+    [motos.length]
+  );
+
+  const handleDetailsChanged = useCallback(
+    (slider: KeenSliderInstance) => {
+      updateTweenValues(slider);
+      updateCurrentSlide(slider);
+    },
+    [updateTweenValues, updateCurrentSlide]
+  );
 
   const autoplay = useMemo(
     () => (slider: KeenSliderInstance) => {
@@ -70,6 +90,7 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
       };
 
       slider.on('created', () => {
+        pauseAutoplayRef.current = pauseForInteraction;
         slider.container.addEventListener('mouseenter', handleMouseEnter);
         slider.container.addEventListener('mouseleave', handleMouseLeave);
         slider.container.addEventListener('pointerdown', pauseForInteraction);
@@ -79,6 +100,7 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
       slider.on('animationEnded', nextTimeout);
       slider.on('updated', nextTimeout);
       slider.on('destroyed', () => {
+        pauseAutoplayRef.current = null;
         slider.container.removeEventListener('mouseenter', handleMouseEnter);
         slider.container.removeEventListener('mouseleave', handleMouseLeave);
         slider.container.removeEventListener('pointerdown', pauseForInteraction);
@@ -88,7 +110,7 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
     []
   );
 
-  const [sliderRef] = useKeenSlider<HTMLDivElement>(
+  const [sliderRef, sliderInstanceRef] = useKeenSlider<HTMLDivElement>(
     {
       loop: enableCarousel,
       renderMode: 'precision',
@@ -102,12 +124,27 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
           slides: { perView: 3, spacing: 16, origin: 'center' },
         },
       },
-      created: updateTweenValues,
-      updated: updateTweenValues,
-      detailsChanged: updateTweenValues,
+      created: handleDetailsChanged,
+      updated: handleDetailsChanged,
+      detailsChanged: handleDetailsChanged,
     },
     enableCarousel ? [autoplay] : []
   );
+
+  const handlePrev = () => {
+    pauseAutoplayRef.current?.();
+    sliderInstanceRef.current?.prev();
+  };
+
+  const handleNext = () => {
+    pauseAutoplayRef.current?.();
+    sliderInstanceRef.current?.next();
+  };
+
+  const handleDotClick = (index: number) => {
+    pauseAutoplayRef.current?.();
+    sliderInstanceRef.current?.moveToIdx(index);
+  };
 
   if (!enableCarousel) {
     return (
@@ -128,31 +165,76 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
 
   return (
     <div className="py-8">
-      <div ref={sliderRef} className={cn('keen-slider', showDesktopGrid && 'lg:hidden')}>
-        {carouselMotos.map((moto, index) => {
-          const scale = tweenValues.length ? tweenValues[index] || 0.9 : 1;
-          const isCenter = scale > 1.0;
+      <div className={cn('relative', showDesktopGrid && 'lg:hidden')}>
+        <div ref={sliderRef} className="keen-slider">
+          {carouselMotos.map((moto, index) => {
+            const scale = tweenValues.length ? tweenValues[index] || 0.9 : 1;
+            const isCenter = scale > 1.0;
 
-          return (
-            <div key={`${moto.id}-${index}`} className="keen-slider__slide">
-              <div
-                className={cn(
-                  'transition-[transform,opacity,box-shadow] duration-500 ease-out',
-                  isCenter ? 'shadow-2xl ring-2 ring-primary/20 rounded-xl' : ''
-                )}
-                style={{
-                  transform: `scale(${scale})`,
-                  opacity: scale < 0.9 ? 0.6 : 1,
-                  zIndex: isCenter ? 10 : 1,
-                  willChange: 'transform, opacity',
-                }}
-              >
-                <MotoCard moto={moto} onClick={onMotoClick} imageHeight={imageHeight} />
+            return (
+              <div key={`${moto.id}-${index}`} className="keen-slider__slide">
+                <div
+                  className={cn(
+                    'transition-[transform,opacity,box-shadow] duration-500 ease-out',
+                    isCenter ? 'shadow-2xl ring-2 ring-primary/20 rounded-xl' : ''
+                  )}
+                  style={{
+                    transform: `scale(${scale})`,
+                    opacity: scale < 0.9 ? 0.6 : 1,
+                    zIndex: isCenter ? 10 : 1,
+                    willChange: 'transform, opacity',
+                  }}
+                >
+                  <MotoCard moto={moto} onClick={onMotoClick} imageHeight={imageHeight} />
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {motos.length > 1 && (
+          <>
+            <button
+              type="button"
+              aria-label="Anterior"
+              onClick={handlePrev}
+              className="absolute left-2 top-1/2 z-10 h-7 w-7 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 text-gray-700 shadow-sm transition hover:bg-white"
+            >
+              <ChevronLeft className="mx-auto h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Siguiente"
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 z-10 h-7 w-7 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 text-gray-700 shadow-sm transition hover:bg-white"
+            >
+              <ChevronRight className="mx-auto h-3.5 w-3.5" />
+            </button>
+          </>
+        )}
       </div>
+
+      {motos.length > 1 && (
+        <div
+          className={cn(
+            'mt-4 flex flex-wrap justify-center gap-2',
+            showDesktopGrid && 'lg:hidden'
+          )}
+        >
+          {motos.map((_, index) => (
+            <button
+              key={`dot-${index}`}
+              type="button"
+              aria-label={`Ir al item ${index + 1}`}
+              onClick={() => handleDotClick(index)}
+              className={cn(
+                'h-2 w-2 rounded-full transition-all',
+                currentSlide === index ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'
+              )}
+            />
+          ))}
+        </div>
+      )}
 
       {showDesktopGrid && (
         <div className="hidden lg:flex flex-wrap justify-center gap-6">

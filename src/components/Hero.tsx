@@ -5,6 +5,7 @@ import { MotoModal } from '@/components/MotoModal';
 import { cn } from '@/lib/utils';
 import { getMotoImageUrl } from '@/lib/cloudinary-url';
 import { Moto } from '@/types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeroProps {
   heroMotos?: Moto[];
@@ -48,6 +49,18 @@ export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) 
   const displayName = currentMoto
     ? `${currentMoto.marca} ${currentMoto.nombre}`
     : 'MODELOS EXCLUSIVOS';
+
+  const handlePrev = () => {
+    if (heroMotos.length <= 1) return;
+    registerInteraction();
+    setCurrentIndex((prev) => (prev - 1 + heroMotos.length) % heroMotos.length);
+  };
+
+  const handleNext = () => {
+    if (heroMotos.length <= 1) return;
+    registerInteraction();
+    setCurrentIndex((prev) => (prev + 1) % heroMotos.length);
+  };
 
   return (
     <>
@@ -165,6 +178,27 @@ export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) 
                   />
                 </div>
               </div>
+            )}
+
+            {heroMotos.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Anterior"
+                  onClick={handlePrev}
+                  className="absolute left-3 top-1/2 z-20 h-7 w-7 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 text-gray-700 shadow-sm transition hover:bg-white"
+                >
+                  <ChevronLeft className="mx-auto h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Siguiente"
+                  onClick={handleNext}
+                  className="absolute right-3 top-1/2 z-20 h-7 w-7 -translate-y-1/2 rounded-full border border-gray-200 bg-white/90 text-gray-700 shadow-sm transition hover:bg-white"
+                >
+                  <ChevronRight className="mx-auto h-3.5 w-3.5" />
+                </button>
+              </>
             )}
 
             {/* Carousel Indicators */}
