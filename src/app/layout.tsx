@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from 'next';
 import { Bebas_Neue, Inter, Parisienne } from 'next/font/google';
+import 'keen-slider/keen-slider.min.css';
 import './globals.css';
 
 const bebasNeue = Bebas_Neue({

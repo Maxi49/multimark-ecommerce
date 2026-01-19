@@ -57,7 +57,7 @@ export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) 
               </p>
               <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-[0.9] text-black">
                 POTENCIA <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-700">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-blue-700">
                   SIN LÍMITES
                 </span>
               </h1>
