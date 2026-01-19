@@ -68,7 +68,7 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
         if (mouseOver) return;
         const now = Date.now();
         const waitForPause = Math.max(0, pausedUntil - now);
-        const delay = waitForPause > 0 ? waitForPause : 3000;
+        const delay = waitForPause > 0 ? waitForPause : 3500;
         timeout = setTimeout(() => {
           slider.next();
         }, delay);
