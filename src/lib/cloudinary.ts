@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import type { UploadApiOptions } from 'cloudinary';
 import dotenv from 'dotenv';
 import { getLogoImageUrl, getMotoImageUrl } from '@/lib/cloudinary-url';
 dotenv.config();
@@ -21,9 +22,7 @@ export async function uploadImage(file: File, kind: UploadKind = 'moto'): Promis
   const buffer = Buffer.from(arrayBuffer);
 
   return new Promise((resolve, reject) => {
-    type UploadOptions = Parameters<typeof cloudinary.uploader.upload_stream>[0] & {
-      background_removal?: string;
-    };
+    type UploadOptions = UploadApiOptions & { background_removal?: string };
     const uploadOptions: UploadOptions = {
       folder: 'multimark-motos',
       notification_url: '',

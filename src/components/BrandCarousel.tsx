@@ -57,7 +57,7 @@ export function BrandCarousel({ motos, onMotoClick, imageHeight }: BrandCarousel
       loop: enableCarousel,
       align: 'center',
       skipSnaps: !enableCarousel,
-      draggable: enableCarousel,
+      watchDrag: enableCarousel,
       startIndex,
     },
     enableCarousel ? [autoplay.current] : []
