@@ -28,11 +28,11 @@ export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) 
 
     const interval = setInterval(() => {
       const now = Date.now();
-      if (now - lastInteractionRef.current < 5000) {
+      if (now - lastInteractionRef.current < 3300) {
         return;
-      }
+      } 
       setCurrentIndex((prev) => (prev + 1) % heroMotos.length);
-    }, 5000); // 5 seconds per slide
+    }, 3300); // 5 seconds per slide
 
     return () => clearInterval(interval);
   }, [heroMotos.length]);
@@ -128,7 +128,7 @@ export function Hero({ heroMotos = [], imageScale, whatsappNumber }: HeroProps) 
                 <div
                   key={moto.id}
                   className={cn(
-                    "absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out will-change-transform will-change-opacity motion-reduce:transition-none",
+                    "absolute inset-0 flex items-center justify-center transition-all duration-600 ease-out will-change-transform will-change-opacity motion-reduce:transition-none",
                     idx === currentIndex
                       ? "opacity-100 translate-y-0 scale-100 cursor-pointer"
                       : "opacity-0 translate-y-3 scale-[0.98] pointer-events-none"
