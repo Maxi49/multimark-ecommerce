@@ -1,5 +1,6 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { Bebas_Neue, Inter, Parisienne } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import 'keen-slider/keen-slider.min.css';
 import './globals.css';
 
@@ -53,6 +54,7 @@ export default function RootLayout({
         className={`${bebasNeue.variable} ${inter.variable} ${parisienne.variable} font-sans antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
